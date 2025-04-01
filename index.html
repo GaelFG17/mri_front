@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MRI Deteccion Tumores</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center px-4">
+  <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl text-center space-y-6">
+    <h1 class="text-3xl font-bold text-gray-800">Deteccion de Tumores con MRI</h1>
+    
+    <div class="space-y-4">
+      <input 
+        type="file" 
+        id="imageInput" 
+        accept="image/*" 
+        class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+               file:rounded-full file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-50 file:text-blue-700
+               hover:file:bg-blue-100"
+      />
+      <button 
+        onclick="enviar()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition duration-200"
+      >
+        Enviar
+      </button>
+    </div>
+
+    <div class="mt-6 space-y-2">
+      <h2 id="resultado" class="text-xl font-semibold text-gray-700"></h2>
+      <p id="probabilidad" class="text-gray-600"></p>
+    </div>
+
+    <div id="imagenes" class="flex flex-wrap justify-center gap-4 mt-4">
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-500 mb-1">MRI Original</p>
+        <img id="mri" class="max-w-[300px] rounded shadow-md" />
+      </div>
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-500 mb-1">Máscara</p>
+        <img id="mask" class="max-w-[300px] rounded shadow-md" />
+      </div>
+      <div class="flex flex-col items-center">
+        <p class="text-sm text-gray-500 mb-1">Superposición</p>
+        <img id="overlay" class="max-w-[300px] rounded shadow-md" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function enviar() {
+      const input = document.getElementById("imageInput");
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append("image", file);
+
+      fetch("https://web-production-34bf.up.railway.app/predict", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("resultado").textContent = data.result;
+        document.getElementById("probabilidad").textContent = "Probabilidad: " + data.probability.toFixed(4);
+
+        document.getElementById("mri").src = "data:image/png;base64," + data.mri;
+
+        if (data.mask) {
+          document.getElementById("mask").src = "data:image/png;base64," + data.mask;
+          document.getElementById("overlay").src = "data:image/png;base64," + data.overlay;
+        } else {
+          document.getElementById("mask").src = "";
+          document.getElementById("overlay").src = "";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
