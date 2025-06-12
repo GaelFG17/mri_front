@@ -54,9 +54,9 @@
       const input = document.getElementById("imageInput");
       const file = input.files[0];
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("data", file);
 
-      fetch("https://web-production-34bf.up.railway.app/predict", {
+      fetch("https://web-production-d25c.up.railway.app/predict", {
         method: "POST",
         body: formData
       })
